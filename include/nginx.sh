@@ -21,8 +21,17 @@ install_nginx(){
     --with-http_gzip_static_module"
 
     log "Info" "Starting to install dependencies packages for nginx..."
-    # local apt_list=(zlib1g-dev openssl libssl-dev libxml2-dev lynx lua-expat-dev libjansson-dev)
-    # local yum_list=(zlib-devel openssl-devel libxml2-devel lynx expat-devel lua-devel lua jansson-devel)
+    local yum_list=(pcre-devel openssl openssl-devel)
+    if check_sys packageManager apt; then
+        for depend in ${apt_list[@]}; do
+            error_detect_depends "apt-get -y install ${depend}"
+        done
+    elif check_sys packageManager yum; then
+        for depend in ${yum_list[@]}; do
+            error_detect_depends "yum -y install ${depend}"
+        done
+    fi
+    log "Info" "Install dependencies packages for nginx completed..."
 
     cd ${cur_dir}/software/
     download_file "${nginx_1_8_filename}.tar.gz" "${nginx_1_8_filename_url}"
