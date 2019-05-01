@@ -1009,8 +1009,20 @@ lamp_install(){
     if [ ! -d ${cur_dir}/software ]; then
         mkdir -p ${cur_dir}/software
     fi
-    [ "${apache}" != "do_not_install" ] && check_installed "install_apache" "${apache_location}"
+    # [ "${apache}" != "do_not_install" ] && check_installed "install_apache" "${apache_location}"
+    # [ "${apache_modules_install}" != "do_not_install" ] && install_apache_modules
+
+    if echo "${apache}" | grep -qi "apache"; then
+        check_installed "install_apache" "${apache_location}"
+       
+    elif echo "${apache}" | grep -qi "nginx"; then
+        check_installed "install_nginx" "${nginx_location}"
+    elif echo "${apache}" | grep -qi "tengine";then
+        check_installed "install_tengine" "${tengine_location}"
+    fi
     [ "${apache_modules_install}" != "do_not_install" ] && install_apache_modules
+
+
     if echo "${mysql}" | grep -qi "mysql"; then
         check_installed "install_mysqld" "${mysql_location}"
     elif echo "${mysql}" | grep -qi "mariadb"; then
@@ -1029,6 +1041,8 @@ lamp_install(){
 #Pre-installation
 lamp_preinstall(){
     apache_preinstall_settings
+    nginx_preinstall_settings
+    tengine_preinstall_settings
     mysql_preinstall_settings
     php_preinstall_settings
     php_modules_preinstall_settings

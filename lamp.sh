@@ -30,7 +30,7 @@ include(){
 }
 
 version(){
-    echo "Version: 20190408"
+    echo "Version: 20190501"
 }
 
 show_parameters(){
@@ -47,7 +47,7 @@ show_parameters(){
 show_help(){
     echo
     echo "+-------------------------------------------------------------------+"
-    echo "| Auto Install LAMP(Linux + Apache + MySQL/MariaDB/Percona + PHP )  |"
+    echo "| Auto Install LNAMP(Linux + Apache + MySQL/MariaDB/Percona + PHP ) |"
     echo "| Intro : https://lamp.sh                                           |"
     echo "| Author: Teddysun <i@teddysun.com>                                 |"
     echo "+-------------------------------------------------------------------+"
@@ -74,7 +74,7 @@ Options:
 
 Parameters:
 "
-    echo "--apache_option [1-2], please select a Apache version like below"
+    echo "--apache_option [1-4], please select a Apache version like below"
     show_parameters apache
     echo "--db_option [1-14], please select a Database version like below"
     show_parameters mysql
@@ -110,7 +110,7 @@ process(){
                 log "Error" "apache_option input error. please only input a number."
                 exit 1
             fi
-            [[ "${apache_option}" -lt 1 || "${apache_option}" -gt 2 ]] && { log "Error" "apache_option input error. please only input a number between 1 and 2"; exit 1; }
+            [[ "${apache_option}" -lt 1 || "${apache_option}" -gt 4 ]] && { log "Error" "apache_option input error. please only input a number between 1 and 2"; exit 1; }
             eval apache=${apache_arr[${apache_option}-1]}
             ;;
         --apache_modules)
@@ -274,6 +274,8 @@ main() {
 include config
 include public
 include apache
+include nginx
+include tengine
 include mysql
 include php
 include php-modules

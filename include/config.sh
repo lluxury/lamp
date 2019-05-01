@@ -216,10 +216,6 @@ php_libsodium_filename_url="https://github.com/jedisct1/libsodium-php/archive/2.
 #software array setting
 apache_arr=(
 ${apache2_4_filename}
-do_not_install
-)
-
-nginx_arr=(
 ${nginx_1_8_filename}
 ${tengine2_2_filename}
 do_not_install
