@@ -13,4 +13,6 @@ install_tengine(){
     echo "it's work tenginx"
 }
     
-tengine_preinstall_settings(){}
+tengine_preinstall_settings(){
+    pass
+}

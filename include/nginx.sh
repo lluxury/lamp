@@ -9,5 +9,10 @@ nginx_preinstall_settings(){
     # fi
 }
 
-install_nginx(){}
-nginx_preinstall_settings(){}
+install_nginx(){
+    pass
+}
+
+nginx_preinstall_settings(){
+    pass
+}
