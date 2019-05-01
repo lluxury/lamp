@@ -64,13 +64,22 @@ config_tengine(){
     # chown -R www:www /alidata/www
     cd ..
 
-    # cp -fR ./tengine/config-tengine/* /alidata/server/tengine/conf/
-    cp -fR ./tengine/config-tengine/* ${tengine_location}/conf/  # needupdate
-    sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${tengine_location}/conf/tengine.conf
-    chmod 755 ${tengine_location}/sbin/nginx
-    #/alidata/server/tengine/sbin/tengine
-    # mv ${tengine_location}/sbin/tengine /etc/init.d/
-    ln -s ${tengine_location}/sbin/nginx /usr/sbin/nginx
+    # cp -fR ./nginx/config-nginx/* ${nginx_location}/conf/   # need update
+    if [ -f "${nginx_location}/conf/nginx.conf" ]; then
+    mv ${nginx_location}/conf/nginx.conf ${nginx_location}/conf/nginx.conf.bak
+    fi
+    
+    cp -f ${cur_dir}/conf/nginx.conf ${nginx_location}/conf/
+    
+    mkdir -p ${nginx_location}/conf/vhost/
+    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhost/
+    
+    sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
+    
+    chmod 755 ${nginx_location}/sbin/nginx
+    #/alidata/server/nginx/sbin/nginx
+    # mv ${nginx_location}/sbin/nginx /etc/init.d/
+    ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
     chmod +x /usr/sbin/nginx
     nginx
 # systemctl start tengine.service

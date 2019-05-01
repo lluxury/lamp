@@ -999,10 +999,37 @@ install_tools(){
     check_command_exist "ntpdate"
 }
 
+#start install fail2ban
+install_fail2ban(){
+    log "Info" "Starting to install development fail2ban"
+    # check
+    yum install -y fail2ban 
+    systemctl enable fail2ban
+
+    cat > /etc/fail2ban/jail.local <<EOF
+[DEFAULT]
+# Ban hosts for one hour:
+bantime = 43200
+findtime = 600
+maxretry = 1
+
+# Override /etc/fail2ban/jail.d/00-firewalld.conf:
+banaction = iptables-multiport
+
+[sshd]
+enabled = true
+EOF
+
+systemctl restart fail2ban
+
+    log "Info" "Install development fail2ban completed..."    
+}
+
 #start install lamp
 lamp_install(){
     disable_selinux
     install_tools
+    install_fail2ban
     sync_time
     remove_packages
 
