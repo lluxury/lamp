@@ -1,12 +1,14 @@
 
 
 nginx_preinstall_settings(){
-    display_menu nginx last
+    # display_menu nginx last
     # if [ "${nginx}" == "do_not_install" ]; then
     #     apache_modules_install="do_not_install"
     # else
     #     display_menu_multi apache_modules last
     # fi
+    apache_modules_install="do_not_install"
+    pass
 }
 
 install_nginx(){
@@ -59,9 +61,18 @@ config_nginx(){
     # chown -R www:www /alidata/www
     cd ..
 
-    # cp -fR ./nginx/config-nginx/* /alidata/server/nginx/conf/
-    cp -fR ./nginx/config-nginx/* ${nginx_location}/conf/   # need update
+    # cp -fR ./nginx/config-nginx/* ${nginx_location}/conf/   # need update
+    if [ -f "${nginx_location}/conf/nginx.conf" ]; then
+    mv ${nginx_location}/conf/nginx.conf ${nginx_location}/conf/nginx.conf.bak
+    fi
+    
+    cp -f ${cur_dir}/conf/nginx.conf ${nginx_location}/conf/
+    
+    mkdir -p ${nginx_location}/conf/vhost/
+    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhost/
+    
     sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
+    
     chmod 755 ${nginx_location}/sbin/nginx
     #/alidata/server/nginx/sbin/nginx
     # mv ${nginx_location}/sbin/nginx /etc/init.d/

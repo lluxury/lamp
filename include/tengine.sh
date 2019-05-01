@@ -1,12 +1,15 @@
 
 
 tengine_preinstall_settings(){
-    display_menu tengine last
+    # display_menu tengine last
     # if [ "${apache}" == "do_not_install" ]; then
     #     apache_modules_install="do_not_install"
     # else
     #     display_menu_multi apache_modules last
     # fi
+    apache_modules_install="do_not_install"
+    pass
+
 }
 
 install_tengine(){
