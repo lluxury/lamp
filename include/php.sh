@@ -31,21 +31,25 @@ install_php(){
     else
         with_mysql=""
     fi
+
     if [ "${php}" == "${php5_6_filename}" ]; then
         with_gd="--with-gd --with-vpx-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     else
         with_gd="--with-gd --with-webp-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     fi
+
     if [[ "${php}" == "${php7_2_filename}" || "${php}" == "${php7_3_filename}" ]]; then
         other_options="--enable-zend-test"
     else
         other_options="--with-mcrypt --enable-gd-native-ttf"
     fi
+
     if [ "${php}" == "${php7_3_filename}" ]; then
         with_libmbfl=""
     else
         with_libmbfl="--with-libmbfl"
     fi
+
     is_64bit && with_libdir="--with-libdir=lib64" || with_libdir=""
     php_configure_args="--prefix=${php_location} \
     --with-apxs2=${apache_location}/bin/apxs \
@@ -85,6 +89,8 @@ install_php(){
     --enable-calendar \
     --enable-dba \
     --enable-exif \
+    --enable-fastcgi \
+    --enable-fpm \
     --enable-ftp \
     --enable-gd-jis-conv \
     --enable-intl \
@@ -96,6 +102,17 @@ install_php(){
     --enable-wddx \
     --enable-zip \
     ${disable_fileinfo}"
+
+# --enable-opcache \
+# --enable-static \
+# --enable-inline-optimization \
+# --with-iconv \ moudle
+# --without-sqlite \
+# --disable-ipv6 \
+# --disable-debug \
+# --disable-maintainer-zts \
+# --disable-safe-mode \
+
 
     #Install PHP depends
     install_php_depends
@@ -130,6 +147,14 @@ install_php(){
     error_detect "./configure ${php_configure_args}"
     error_detect "parallel_make ZEND_EXTRA_LIBS='-liconv'"
     error_detect "make install"
+
+# CPU_NUM=$(cat /proc/cpuinfo | grep processor | wc -l)
+# if [ $CPU_NUM -gt 1 ];then
+#     make ZEND_EXTRA_LIBS='-liconv' -j$CPU_NUM
+# else
+#     make ZEND_EXTRA_LIBS='-liconv'
+# fi
+# make install
 
     mkdir -p ${php_location}/{etc,php.d}
     cp -f ${cur_dir}/conf/php.ini ${php_location}/etc/php.ini
@@ -166,10 +191,48 @@ EOF
         sed -i "s#mysql.default_socket.*#mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
         sed -i "s#mysqli.default_socket.*#mysqli.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
         sed -i "s#pdo_mysql.default_socket.*#pdo_mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
+        
+        sed -i 's/post_max_size = 8M/post_max_size = 64M/g' ${php_location}/etc/php.ini
+        sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 64M/g' ${php_location}/etc/php.ini
+        sed -i 's/;date.timezone =/date.timezone = PRC/g' ${php_location}/etc/php.ini
+        sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' ${php_location}/etc/php.ini
+        sed -i 's/max_execution_time = 30/max_execution_time = 300/g' ${php_location}/etc/php.ini
+
+
     fi
 
     if [[ -d "${apache_location}" ]]; then
         sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType appication/x-httpd-php-source .phps@" ${apache_location}/conf/httpd.conf
     fi
+
+    if [[ -d "${nginx_location}" || -d "${tengine_location}" ]]; then
+        sed -i 's#; extension_dir = \"\.\/\"#extension_dir = "${php_location}/lib/php/extensions/no-debug-non-zts-20121212/"#'  ${php_location}/etc/php.ini
+
+        cp ${php_location}/etc/php-fpm.conf.default ${php_location}/etc/php-fpm.conf
+        # sed -i 's,^pm.min_spare_servers = 1,pm.min_spare_servers = 5,g'   ${php_location}/etc/php-fpm.conf
+        # sed -i 's,^pm.max_spare_servers = 3,pm.max_spare_servers = 35,g'   ${php_location}/etc/php-fpm.conf
+        # sed -i 's,^pm.max_children = 5,pm.max_children = 100,g'   ${php_location}/etc/php-fpm.conf
+        sed -i 's,;pid = run/php-fpm.pid,pid = run/php-fpm.pid,g'   ${php_location}/etc/php-fpm.conf
+        sed -i 's,;error_log = log/php-fpm.log,error_log = /var/log/php/php-fpm.log,g'   ${php_location}/etc/php-fpm.conf
+        sed -i 's,; http://php.net/include-path,include=/usr/local/php/etc/php-fpm.d/*.conf,g'   ${php_location}/etc/php-fpm.conf
+
+        # mkdir -p ${php_location}/etc/php-fpm.d/
+        cp ${php_location}/etc/php-fpm.d/www.conf.default ${php_location}/etc/php-fpm.d/www.conf
+        sed -i 's,user = nobody,user=www,g'   ${php_location}/etc/php-fpm.d/www.conf
+        sed -i 's,group = nobody,group=www,g'   ${php_location}/etc/php-fpm.d/www.conf
+        sed -i 's,; listen = 127.0.0.1:9000,listen = 127.0.0.1:9000 ,g'   ${php_location}/etc/php-fpm.d/www.conf
+        sed -i 's,;slowlog = log/$pool.log.slow,slowlog = /var/log/php/\$pool.log.slow,g'   ${php_location}/etc/php-fpm.d/www.conf
+        sed -i 's,;request_slowlog_timeout = 0,request_slowlog_timeout = 10,g'   ${php_location}/etc/php-fpm.d/www.conf
+
+        # sed -i 's,^pm.start_servers = 2,pm.start_servers = 20,g'   ${php_location}/etc/php-fpm.conf
+        # php_value[session.save_handler] = files
+        # php_value[session.save_path] = /var/lib/php/session
+
+        #self start
+        # install -v -m755 ./php-7.1.15/sapi/fpm/init.d.php-fpm  /etc/init.d/php-fpm
+        # /etc/init.d/php-fpm start
+        # sleep 5
+    fi
+
 
 }

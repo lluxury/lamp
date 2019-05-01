@@ -1023,6 +1023,7 @@ EOF
 systemctl restart fail2ban
 
     log "Info" "Install development fail2ban completed..."    
+    log "Info" "Using fail2ban-client status sshd to check"    
 }
 
 #start install lamp
