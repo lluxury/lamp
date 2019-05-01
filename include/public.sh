@@ -1013,8 +1013,7 @@ lamp_install(){
     # [ "${apache_modules_install}" != "do_not_install" ] && install_apache_modules
 
     if echo "${apache}" | grep -qi "apache"; then
-        check_installed "install_apache" "${apache_location}"
-       
+        check_installed "install_apache" "${apache_location}"     
     elif echo "${apache}" | grep -qi "nginx"; then
         check_installed "install_nginx" "${nginx_location}"
     elif echo "${apache}" | grep -qi "tengine";then

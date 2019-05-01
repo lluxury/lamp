@@ -46,10 +46,10 @@ openssl_filename_url="https://www.openssl.org/source/openssl-1.1.1b.tar.gz"
 apache2_4_filename="httpd-2.4.39"
 apache2_4_filename_url="http://ftp.jaist.ac.jp/pub/apache//httpd/httpd-2.4.39.tar.gz"
 #nginx1.8
-nginx_1_8_filename="nginx-1.8.1.tar.gz"
+nginx_1_8_filename="nginx-1.8.1"
 nginx_1_8_filename_url="http://nginx.org/download/nginx-1.8.1.tar.gz"
 #tengine2.2
-tengine2_2_filename="tengine-2.2.0.tar.gz"
+tengine2_2_filename="tengine-2.2.0"
 tengine2_2_filename_url="http://tengine.taobao.org/download/tengine-2.2.0.tar.gz"
 #mysql5.5
 mysql5_5_filename="mysql-5.5.62"
