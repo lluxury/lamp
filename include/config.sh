@@ -125,9 +125,11 @@ mhash_filename_url="https://sourceforge.net/projects/mhash/files/mhash/0.9.9.9/m
 #libmcrypt
 libmcrypt_filename="libmcrypt-2.5.8"
 libmcrypt_filename_url="https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/libmcrypt-2.5.8.tar.gz/download"
+# libmcrypt_filename_url="http://oss.aliyuncs.com/aliyunecs/onekey/libmcrypt-2.5.8.tar.gz"
 #mcrypt
 mcrypt_filename="mcrypt-2.6.8"
 mcrypt_filename_url="https://sourceforge.net/projects/mcrypt/files/MCrypt/2.6.8/mcrypt-2.6.8.tar.gz/download"
+# mcrypt_filename_url="http://downloads.sourceforge.net/mcrypt/mcrypt-2.6.8.tar.gz"
 #pcre
 pcre_filename="pcre-8.43"
 pcre_filename_url="https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz"

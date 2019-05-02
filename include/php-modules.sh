@@ -217,6 +217,7 @@ install_mcrypt(){
         cd ${mcrypt_filename}
 
         ldconfig
+        export LD_LIBRARY_PATH=/usr/local/lib: LD_LIBRARY_PATH
         error_detect "./configure"
         error_detect "parallel_make"
         error_detect "make install"

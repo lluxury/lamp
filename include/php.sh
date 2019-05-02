@@ -32,6 +32,13 @@ install_php(){
         with_mysql=""
     fi
 
+    if [ "${apache}" == "${apache2_4_filename}" ]; then
+        with_apxs="--with-apxs2=${apache_location}/bin/apxs"
+    else
+        with_apxs=""
+    fi
+
+
     if [ "${php}" == "${php5_6_filename}" ]; then
         with_gd="--with-gd --with-vpx-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     else
@@ -52,7 +59,7 @@ install_php(){
 
     is_64bit && with_libdir="--with-libdir=lib64" || with_libdir=""
     php_configure_args="--prefix=${php_location} \
-    --with-apxs2=${apache_location}/bin/apxs \
+    ${with_apxs} \
     --with-config-file-path=${php_location}/etc \
     --with-config-file-scan-dir=${php_location}/php.d \
     --with-pcre-dir=${depends_prefix}/pcre \
