@@ -1,3 +1,71 @@
+最近打算搭个博客给自己用,发现很久没做lnmp了,所以有了下文:
+
+暂命名为 "一键舒服 01号成果"
+根据自己需要,制作的修改版, 增加了 nginx的安装功能,提供了新的一鍵安装方法.
+花了四天时间测试,大约装了几十次, 终于得出一个能用的版本,
+虽然我想做到更广泛的兼容,但目录没有那个精也没有相应的时间.
+
+所以个人建议如下, 和我选一样的环境,就下面这个链接,两个里挑一个即可.
+这是主机厂商的推广, 使用后会给你和我各10刀,没有啥负作用.当然,自己有服务器用自己的也可以.
+系统选centos7, 然后把我贴在这里的代码直接复制过去用就好. 
+<a href="https://www.vultr.com/?ref=7997492"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
+
+```bash
+cd ~
+yum -y install wget git tmux
+git clone https://github.com/lluxury/lamp.git
+cd lamp
+chmod 755 *.sh
+
+cmd=$(which tmux) # tmux path
+session=lamp
+$cmd has -t $session
+
+if [ $? != 0 ]; then
+  $cmd new -d -n f21 -s $session "cd ~/lamp && /usr/bin/sh ~/lamp/lamp.sh --apache_option 2 --apache_modules 4 --db_option 3 \
+  --db_root_pwd lamp.sh --php_option 3 --php_extensions 14 --phpmyadmin_option 2 --kodexplorer_option 2
+"
+fi
+
+tmux a
+```
+<a href="https://www.vultr.com/?ref=7997493-4F"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
+
+附赠一个部署wordpress 博客的语句:
+```bash
+wget https://wordpress.org/wordpress-5.0.3.tar.gz
+tar zxvf wordpress-5.0.3.tar.gz 
+mv wordpress /data/www/
+cd /data/www/
+mv default/ lamp_bak
+mv wordpress default
+chown www.www default/
+
+wget https://downloads.wordpress.org/plugin/wp-statistics.12.6.4.zip
+yum install -y unzip
+unzip wp-statistics.12.6.4.zip 
+mv wp-statistics/ /data/www/default/wp-content/plugins/
+
+
+wget https://downloads.wordpress.org/plugin/weichuncai.zip
+unzip weichuncai.zip 
+mv weichuncai /data/www/default/wp-content/plugins/
+
+...
+
+部署完之后,登陆服务器,键入以下3句命令即可:
+```bash
+mysql -p
+Enter password: 输入 lamp.sh
+create database wp
+```
+
+
+
+然后通过浏览器打开服务器ip,进入wp的部署环节.
+当然,这样数据库会有风险, 稍后会提供一个生成随机密码的功能.
+
+
 <div align="center">
     <a href="https://lamp.sh/" target="_blank">
         <img alt="LAMP" src="https://github.com/teddysun/lamp/blob/master/conf/lamp.png">
