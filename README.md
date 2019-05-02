@@ -7,6 +7,7 @@
 <br>
 所以个人建议如下, 和我选一样的环境:就下面的蓝色条幅链接,两个里挑一个即可.<br>
 这是主机厂商的推广, 使用后会给你和我各10刀,没有啥负作用.当然,自己有服务器用自己的也可以.<br>
+虽然上面印的2.5刀一个月,不过是没ipv4的,而且早被抢完,现有的5刀一个月还是比较靠谱的.
 系统选centos7, 然后把我贴在这里的代码直接复制过去用就好. <br>
 <br>
 <a href="https://www.vultr.com/?ref=7997492"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
@@ -53,15 +54,18 @@ wget https://downloads.wordpress.org/plugin/weichuncai.zip
 unzip weichuncai.zip 
 mv weichuncai /data/www/default/wp-content/plugins/
 
-...
+```
+
 <br>
 部署完之后,登陆服务器,键入以下3句命令即可:<br>
 <br>
+
 ```bash
 mysql -p
 Enter password: 输入 lamp.sh
 create database wp
 ```
+
 <br>
 <br>
 
