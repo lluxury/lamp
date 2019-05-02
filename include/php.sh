@@ -16,7 +16,7 @@ php_preinstall_settings(){
     if [ "${apache}" == "do_not_install" ]; then
         php="do_not_install"
     else
-        display_menu php 4
+        display_menu php 3
     fi
 }
 
@@ -150,7 +150,9 @@ install_php(){
 
     unset LD_LIBRARY_PATH
     unset CPPFLAGS
-    ldconfig
+    # ldconfig
+    echo /usr/local/mysql/lib >> /etc/ld.so.conf.d/mysql-x86_64.conf  && ldconfig -v
+
     error_detect "./configure ${php_configure_args}"
     error_detect "parallel_make ZEND_EXTRA_LIBS='-liconv'"
     error_detect "make install"

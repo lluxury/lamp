@@ -62,7 +62,7 @@ config_nginx(){
     [ ! -d "${web_root_dir}" ] && mkdir -p ${web_root_dir} && chmod -R 755 ${web_root_dir}
 
     ln -s ${nginx_location}/logs /var/log/nginx
-    mkdir /var/log/nginx/logs/access/
+    mkdir -p /var/log/nginx/logs/access/
     # chmod 775 /alidata/server/nginx/logs
     chmod 755 /var/log/nginx/logs
     # chown -R www:www /alidata/server/nginx/logs
