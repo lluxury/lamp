@@ -87,27 +87,10 @@ config_nginx(){
     ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
     chmod +x /usr/sbin/nginx
 
-    cat > /usr/lib/systemd/system/nginx.service<<-EOF
-[Unit]
-Description=nginx
-After=network.target
+    cp -f ${cur_dir}/init.d/nginx-init /etc/init.d/nginx
+    chmod 755 /etc/init.d/nginx
+    chkconfig --add nginx
 
-[Service]
-Type=forking
-PIDFile=/usr/local/nginx/logs/nginx.pid
-ExecStart=/usr/local/nginx/sbin/nginx
-ExecReload=/usr/local/nginx/sbin/nginx -s reload
-ExecStop=/usr/local/nginx/sbin/nginx -s stop
-PrivateTmp=true
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    # nginx
-# systemctl start nginx.service
-
-# chmod 754 /usr/lib/systemd/system/nginx.service
-# systemctl enable nginx.service
 
 }
 

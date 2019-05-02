@@ -1,79 +1,131 @@
-#!/bin/bash
-# nginx Startup script for the Nginx HTTP Server
-# this script create it by ruijie. at 2014.02.26
-# if you find any errors on this scripts,please contact ruijie.
-# and send mail to ruijie at gmail dot com.
-#            ruijie.qiao@gmail.com
+#!/bin/sh
+#
+# nginx - this script starts and stops the nginx daemon
+#
+# chkconfig:   - 85 15
+# description:  NGINX is an HTTP(S) server, HTTP(S) reverse \
+#               proxy and IMAP/POP3 proxy server
+# processname: nginx
+# config:      /etc/nginx/nginx.conf
+# config:      /etc/sysconfig/nginx
+# pidfile:     /var/run/nginx.pid
 
-nginxd=/alidata/server/nginx/sbin/nginx
-nginx_config=/alidata/server/nginx/conf/nginx.conf
-nginx_pid=/alidata/server/nginx/logs/nginx.pid
+# Source function library.
+. /etc/rc.d/init.d/functions
 
-RETVAL=0
-prog="nginx"
+# Source networking configuration.
+. /etc/sysconfig/network
 
-[ -x $nginxd ] || exit 0
+# Check that networking is up.
+[ "$NETWORKING" = "no" ] && exit 0
 
-# Start nginx daemons functions.
-start() {
-    
-    if [ -e $nginx_pid ] && netstat -tunpl | grep nginx &> /dev/null;then
-        echo "nginx already running...."
-        exit 1
+nginx="/usr/sbin/nginx"
+prog=$(basename $nginx)
+
+NGINX_CONF_FILE="/etc/nginx/nginx.conf"
+
+[ -f /etc/sysconfig/nginx ] && . /etc/sysconfig/nginx
+
+lockfile=/var/lock/subsys/nginx
+
+make_dirs() {
+   # make required directories
+   user=`$nginx -V 2>&1 | grep "configure arguments:.*--user=" | sed 's/[^*]*--user=\([^ ]*\).*/\1/g' -`
+   if [ -n "$user" ]; then
+      if [ -z "`grep $user /etc/passwd`" ]; then
+         useradd -M -s /bin/nologin $user
+      fi
+      options=`$nginx -V 2>&1 | grep 'configure arguments:'`
+      for opt in $options; do
+          if [ `echo $opt | grep '.*-temp-path'` ]; then
+              value=`echo $opt | cut -d "=" -f 2`
+              if [ ! -d "$value" ]; then
+                  # echo "creating" $value
+                  mkdir -p $value && chown -R $user $value
+              fi
+          fi
+       done
     fi
-        
-    echo -n $"Starting $prog!"
-    $nginxd -c ${nginx_config}
-    RETVAL=$?
-    echo
-    [ $RETVAL = 0 ] && touch /var/lock/nginx
-    return $RETVAL
 }
 
+start() {
+    [ -x $nginx ] || exit 5
+    [ -f $NGINX_CONF_FILE ] || exit 6
+    make_dirs
+    echo -n $"Starting $prog: "
+    daemon $nginx -c $NGINX_CONF_FILE
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && touch $lockfile
+    return $retval
+}
 
-# Stop nginx daemons functions.
 stop() {
-    echo -n $"Stopping $prog!"
-    $nginxd -s stop
-    RETVAL=$?
+    echo -n $"Stopping $prog: "
+    killproc $prog -QUIT
+    retval=$?
     echo
-    [ $RETVAL = 0 ] && rm -f /var/lock/nginx
+    [ $retval -eq 0 ] && rm -f $lockfile
+    return $retval
 }
 
+restart() {
+    configtest || return $?
+    stop
+    sleep 1
+    start
+}
 
-# reload nginx service functions.
 reload() {
-
-    echo -n $"Reloading $prog!"
-    #kill -HUP `cat ${nginx_pid}`
-    $nginxd -s reload
+    configtest || return $?
+    echo -n $"Reloading $prog: "
+    killproc $nginx -HUP
     RETVAL=$?
     echo
-
 }
 
-# See how we were called.
+force_reload() {
+    restart
+}
+
+configtest() {
+  $nginx -t -c $NGINX_CONF_FILE
+}
+
+rh_status() {
+    status $prog
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
 case "$1" in
-start)
-        start
+    start)
+        rh_status_q && exit 0
+        $1
         ;;
-
-stop)
-        stop
+    stop)
+        rh_status_q || exit 0
+        $1
         ;;
-
-reload)
-        reload
+    restart|configtest)
+        $1
         ;;
-
-restart)
-        stop
-        start
+    reload)
+        rh_status_q || exit 7
+        $1
         ;;
-
-*)
-        echo $"Usage: $prog {start|stop|restart|reload|help}"
-        exit 1
+    force-reload)
+        force_reload
+        ;;
+    status)
+        rh_status
+        ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+            ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart|reload|force-reload|configtest}"
+        exit 2
 esac
-
-exit $RETVAL

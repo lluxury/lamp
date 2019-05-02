@@ -58,7 +58,7 @@ Usage: $0 [Options]...[Parameters]...
 Options:
 -h, --help                      Print this help text and exit
 -v, --version                   Print program version and exit
---apache_option [1-2]           Apache server version
+--apache_option [1-4]           Web server version
 --apache_modules [mod name]     Apache modules: mod_wsgi, mod_security, mod_jk
 --db_option [1-14]              Database version
 --db_data_path [location]       Database Data Location. for example: /data/db
