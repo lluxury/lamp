@@ -96,7 +96,6 @@ install_php(){
     --enable-calendar \
     --enable-dba \
     --enable-exif \
-    --enable-fastcgi \
     --enable-fpm \
     --enable-ftp \
     --enable-gd-jis-conv \
@@ -119,6 +118,7 @@ install_php(){
 # --disable-debug \
 # --disable-maintainer-zts \
 # --disable-safe-mode \
+# --enable-fastcgi \
 
 
     #Install PHP depends
@@ -150,9 +150,9 @@ install_php(){
 
     unset LD_LIBRARY_PATH
     unset CPPFLAGS
-    # ldconfig
-    echo /usr/local/mysql/lib >> /etc/ld.so.conf.d/mysql-x86_64.conf  && ldconfig -v
-
+    ldconfig
+    
+    export LD_LIBRARY_PATH=/lib/:/usr/lib/:/usr/local/lib
     error_detect "./configure ${php_configure_args}"
     error_detect "parallel_make ZEND_EXTRA_LIBS='-liconv'"
     error_detect "make install"

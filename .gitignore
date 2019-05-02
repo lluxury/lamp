@@ -7,3 +7,4 @@ upgrade_phpmyadmin.log
 pmaversion.txt
 software/
 mysql_bkup/
+.DS_Store

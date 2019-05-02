@@ -79,7 +79,7 @@ config_nginx(){
     cp -f ${cur_dir}/conf/nginx.conf ${nginx_location}/conf/
     
     mkdir -p ${nginx_location}/conf/vhosts/
-    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhost/
+    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhosts/
     
     sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
     
