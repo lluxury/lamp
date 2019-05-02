@@ -83,9 +83,9 @@ config_nginx(){
     
     sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
     
-    # chmod 755 ${nginx_location}/sbin/nginx
-    # ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
-    # chmod +x /usr/sbin/nginx
+    chmod 755 ${nginx_location}/sbin/nginx
+    ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
+    chmod +x /usr/sbin/nginx
 
     cat > /usr/lib/systemd/system/nginx.service<<-EOF
 [Unit]
@@ -105,8 +105,9 @@ WantedBy=multi-user.target
 EOF
     # nginx
 # systemctl start nginx.service
-chmod 754 /usr/lib/systemd/system/nginx.service
-systemctl enable nginx.service
+
+# chmod 754 /usr/lib/systemd/system/nginx.service
+# systemctl enable nginx.service
 
 }
 
