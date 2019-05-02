@@ -1,15 +1,16 @@
 最近打算搭个博客给自己用,发现很久没做lnmp了,所以有了下文:
 
-暂命名为 "一键舒服 01号成果"
-根据自己需要,制作的修改版, 增加了 nginx的安装功能,提供了新的一鍵安装方法.
-花了四天时间测试,大约装了几十次, 终于得出一个能用的版本,
-虽然我想做到更广泛的兼容,但目录没有那个精也没有相应的时间.
-
-所以个人建议如下, 和我选一样的环境,就下面这个链接,两个里挑一个即可.
-这是主机厂商的推广, 使用后会给你和我各10刀,没有啥负作用.当然,自己有服务器用自己的也可以.
-系统选centos7, 然后把我贴在这里的代码直接复制过去用就好. 
+暂命名为 "一键舒服 01号成果"<br>
+根据自己需要,制作的修改版, 增加了 nginx的安装功能,提供了新的一鍵安装方法.<br>
+花了四天时间测试,大约装了几十次, 终于得出一个能用的版本,<br>
+虽然我想做到更广泛的兼容,但目录没有那个精也没有相应的时间.<br>
+<br>
+所以个人建议如下, 和我选一样的环境:就下面的蓝色条幅链接,两个里挑一个即可.<br>
+这是主机厂商的推广, 使用后会给你和我各10刀,没有啥负作用.当然,自己有服务器用自己的也可以.<br>
+系统选centos7, 然后把我贴在这里的代码直接复制过去用就好. <br>
+<br>
 <a href="https://www.vultr.com/?ref=7997492"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
-
+<br>
 ```bash
 cd ~
 yum -y install wget git tmux
@@ -30,8 +31,9 @@ fi
 tmux a
 ```
 <a href="https://www.vultr.com/?ref=7997493-4F"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
-
-附赠一个部署wordpress 博客的语句:
+<br>
+附赠一个部署wordpress 博客的语句:<br>
+<br>
 ```bash
 wget https://wordpress.org/wordpress-5.0.3.tar.gz
 tar zxvf wordpress-5.0.3.tar.gz 
@@ -52,18 +54,19 @@ unzip weichuncai.zip
 mv weichuncai /data/www/default/wp-content/plugins/
 
 ...
-
-部署完之后,登陆服务器,键入以下3句命令即可:
+<br>
+部署完之后,登陆服务器,键入以下3句命令即可:<br>
+<br>
 ```bash
 mysql -p
 Enter password: 输入 lamp.sh
 create database wp
 ```
+<br>
+<br>
 
-
-
-然后通过浏览器打开服务器ip,进入wp的部署环节.
-当然,这样数据库会有风险, 稍后会提供一个生成随机密码的功能.
+然后通过浏览器打开服务器ip,进入wp的部署环节.<br>
+当然,这样数据库会有风险, 稍后会提供一个生成随机密码的功能.<br>
 
 
 <div align="center">
