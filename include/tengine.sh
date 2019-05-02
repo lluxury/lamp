@@ -66,6 +66,7 @@ config_tengine(){
     [ ! -d "${web_root_dir}" ] && mkdir -p ${web_root_dir} && chmod -R 755 ${web_root_dir}
 
     ln -s ${tengine_location}/logs /var/log/nginx
+    mkdir /var/log/nginx/logs/access/
     # chmod 775 /alidata/server/tengine/logs
     chmod 755 /var/log/nginx/logs
     # chown -R www:www /alidata/server/tengine/logs
@@ -81,19 +82,33 @@ config_tengine(){
     
     cp -f ${cur_dir}/conf/nginx.conf ${nginx_location}/conf/
     
-    mkdir -p ${nginx_location}/conf/vhost/
+    mkdir -p ${nginx_location}/conf/vhosts/
     cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhost/
     
     sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
     
-    chmod 755 ${nginx_location}/sbin/nginx
-    #/alidata/server/nginx/sbin/nginx
-    # mv ${nginx_location}/sbin/nginx /etc/init.d/
-    ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
-    chmod +x /usr/sbin/nginx
-    nginx
-# systemctl start tengine.service
-# systemctl enable tengine.service
+    # chmod 755 ${nginx_location}/sbin/nginx
+    # ln -s ${nginx_location}/sbin/nginx /usr/sbin/nginx
+    # chmod +x /usr/sbin/nginx
+    # nginx
+    cat > /usr/lib/systemd/system/nginx.service<<-EOF
+[Unit]
+Description=nginx
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/usr/local/nginx/logs/nginx.pid
+ExecStart=/usr/local/nginx/sbin/nginx
+ExecReload=/usr/local/nginx/sbin/nginx -s reload
+ExecStop=/usr/local/nginx/sbin/nginx -s stop
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+chmod 754 /usr/lib/systemd/system/nginx.service
+systemctl enable nginx.service
 
 }
 

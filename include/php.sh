@@ -155,13 +155,6 @@ install_php(){
     error_detect "parallel_make ZEND_EXTRA_LIBS='-liconv'"
     error_detect "make install"
 
-# CPU_NUM=$(cat /proc/cpuinfo | grep processor | wc -l)
-# if [ $CPU_NUM -gt 1 ];then
-#     make ZEND_EXTRA_LIBS='-liconv' -j$CPU_NUM
-# else
-#     make ZEND_EXTRA_LIBS='-liconv'
-# fi
-# make install
 
     mkdir -p ${php_location}/{etc,php.d}
     cp -f ${cur_dir}/conf/php.ini ${php_location}/etc/php.ini
@@ -223,13 +216,32 @@ EOF
         sed -i 's,;error_log = log/php-fpm.log,error_log = /var/log/php/php-fpm.log,g'   ${php_location}/etc/php-fpm.conf
         sed -i 's,; http://php.net/include-path,include=/usr/local/php/etc/php-fpm.d/*.conf,g'   ${php_location}/etc/php-fpm.conf
 
-        # mkdir -p ${php_location}/etc/php-fpm.d/
+        mkdir -p /var/log/php/
         cp ${php_location}/etc/php-fpm.d/www.conf.default ${php_location}/etc/php-fpm.d/www.conf
+        # /usr/local/php/etc/php-fpm.d/www.conf
         sed -i 's,user = nobody,user=www,g'   ${php_location}/etc/php-fpm.d/www.conf
         sed -i 's,group = nobody,group=www,g'   ${php_location}/etc/php-fpm.d/www.conf
         sed -i 's,; listen = 127.0.0.1:9000,listen = 127.0.0.1:9000 ,g'   ${php_location}/etc/php-fpm.d/www.conf
         sed -i 's,;slowlog = log/$pool.log.slow,slowlog = /var/log/php/\$pool.log.slow,g'   ${php_location}/etc/php-fpm.d/www.conf
         sed -i 's,;request_slowlog_timeout = 0,request_slowlog_timeout = 10,g'   ${php_location}/etc/php-fpm.d/www.conf
+
+cat > /usr/lib/systemd/system/php.service<<-EOF
+[Unit]
+Description=php
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/php/sbin/php-fpm
+ExecStop=/bin/pkill -9 php-fpm
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+chmod 754 /usr/lib/systemd/system/php.service
+systemctl enable php.service
 
         # sed -i 's,^pm.start_servers = 2,pm.start_servers = 20,g'   ${php_location}/etc/php-fpm.conf
         # php_value[session.save_handler] = files
