@@ -19,7 +19,7 @@
 系统选centos7, <br>
 然后把我贴在下面的代码直接复制过去用就好: <br>
 <br>
-https://www.vultr.com/?ref=7997492
+https://www.vultr.com/?ref=7997492 <br>
 <a href="https://www.vultr.com/?ref=7997492"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
 <br>
 ```bash
