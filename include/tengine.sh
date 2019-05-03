@@ -82,8 +82,8 @@ config_tengine(){
     
     cp -f ${cur_dir}/conf/nginx.conf ${nginx_location}/conf/
     
-    mkdir -p ${nginx_location}/conf/vhosts/
-    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhosts/
+    mkdir -p ${nginx_location}/conf/vhost/
+    cp -f ${cur_dir}/conf/default.conf ${nginx_location}/conf/vhost/
     
     sed -i 's/worker_processes  2/worker_processes  '"$CPU_NUM"'/' ${nginx_location}/conf/nginx.conf
     

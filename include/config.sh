@@ -53,10 +53,13 @@ tengine2_2_filename="tengine-2.2.0"
 tengine2_2_filename_url="http://tengine.taobao.org/download/tengine-2.2.0.tar.gz"
 #mysql5.5
 mysql5_5_filename="mysql-5.5.62"
+# wget http://zy-res.oss-cn-hangzhou.aliyuncs.com/mysql/mysql-5.5.40-linux2.6-x86_64.tar.gz
 #mysql5.6
 mysql5_6_filename="mysql-5.6.44"
+# http://zy-res.oss-cn-hangzhou.aliyuncs.com/mysql/mysql-5.6.21-linux-glibc2.5-x86_64.tar.gz
 #mysql5.7
 mysql5_7_filename="mysql-5.7.26"
+# http://mysql.mirror.ac.za/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 #mysql8.0
 mysql8_0_filename="mysql-8.0.16"
 #mariadb5.5

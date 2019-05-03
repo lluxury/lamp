@@ -1,0 +1,7 @@
+
+tag 101
+Tengine version: Tengine/2.2.0
+PHP 7.1.28 (cli)
+mysql  Ver 14.14 Distrib 5.7.25
+
+# cdn 大约只能维持3个版本,后期看及时更新或换 阿里版 要改代码
