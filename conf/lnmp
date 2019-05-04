@@ -1,0 +1,597 @@
+
+#!/usr/bin/env bash
+# Copyright (C) 2013 - 2019 Teddysun <i@teddysun.com>
+# 
+# This file is part of the LAMP script.
+#
+# LAMP is a powerful bash script for the installation of 
+# Nginx + PHP + MySQL/MariaDB/Percona and so on.
+# You can install Nginx + PHP + MySQL/MariaDB/Percona in an very easy way.
+# Just need to input numbers to choose what you want to install before installation.
+# And all things will be done in a few minutes.
+#
+# System Required:  CentOS 6+ / Fedora28+ / Debian 8+ / Ubuntu 14+
+# Description:  Create, Delete, List Nginx Virtual Host
+# Website:  https://lamp.sh
+# Github:   https://github.com/teddysun/lamp
+
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+nginx_location=/usr/local/nginx
+mysql_location=/usr/local/mysql
+mariadb_location=/usr/local/mariadb
+percona_location=/usr/local/percona
+web_root_dir=/data/www/default
+
+rootness(){
+    if [[ ${EUID} -ne 0 ]]; then
+        echo -e "\033[31mError:\033[0m This script must be run as root" 1>&2
+        exit 1
+    fi
+}
+
+vhost(){
+    local action=$1
+    case ${action} in
+        add ) vhost_add;;
+        list ) vhost_list;;
+        del ) vhost_del;;
+        *) echo "action ${action} not found";exit 1;;
+    esac
+}
+
+db_name(){
+    if [ -d ${mysql_location} ]; then
+        echo "MySQL"
+    elif [ -d ${mariadb_location} ]; then
+        echo "MariaDB"
+    elif [ -d ${percona_location} ]; then
+        echo "Percona"
+    else
+        echo "MySQL"
+    fi
+}
+
+set_nginx_allow_syntax(){
+    # if [ -s /usr/sbin/httpd ]; then
+    if [ -s /usr/sbin/nginx ]; then
+        # if /usr/sbin/nginx -v | grep -q "Nginx/2.4"; then
+        if ls /usr/sbin/ | grep -q "nginx"; then
+            allow_from_all="Require all granted"  #not need
+        else
+            echo -e "\033[31mError:\033[0m Can not get Nginx version..."
+            exit 1
+        fi
+    else
+        echo -e "\033[31mError:\033[0m Can not find Nginx, may be not installed. Please check it and try again."
+        exit 1
+    fi
+}
+
+check_email(){
+    regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+    if [[ ${1} =~ ${regex} ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+filter_location(){
+    local location=${1}
+    if ! echo ${location} | grep -q "^/"; then
+        while true
+        do
+            read -p "Please enter a correct location: " location
+            echo ${location} | grep -q "^/" && echo ${location} && break
+        done
+    else
+        echo ${location}
+    fi
+}
+
+vhost_add(){
+    set_nginx_allow_syntax
+
+    while :
+    do
+        read -p "Please enter server names (for example: lamp.sh www.lamp.sh): " server_names
+        for i in ${server_names}; do
+            if nginx_vhost_is_exist ${i}; then
+                echo -e "\033[31mError:\033[0m virtual host [${i}] is existed, please check it and try again."
+                break
+            fi
+            break 2
+        done
+    done
+
+    default_root="/data/www/${server_names%% *}"
+    read -p "Please enter website root directory(default:$default_root): " website_root
+    website_root=${website_root:=$default_root}
+    website_root=$(filter_location "${website_root}")
+    echo "website root directory: ${website_root}"
+    echo
+    php_admin_value=""
+    if [ -s /usr/bin/php ]; then
+        php_admin_value="php_admin_value open_basedir ${website_root}:/tmp:/var/tmp:/proc"
+        if [ -d "${web_root_dir}/phpmyadmin" ]; then
+            php_admin_value="${php_admin_value}:${web_root_dir}/phpmyadmin"
+        fi
+        if [ -d "${web_root_dir}/kod" ]; then
+            php_admin_value="${php_admin_value}:${web_root_dir}/kod"
+        fi
+    fi
+
+    while :
+    do
+        read -p "Please enter Administrator Email address: " email
+        if [ -z "${email}" ]; then
+            echo -e "\033[31mError:\033[0m Administrator Email address can not be empty."
+        elif check_email ${email}; then
+            echo "Administrator Email address:${email}"
+            echo
+            break
+        else
+            echo -e "\033[31mError:\033[0m Please enter a correct email address."
+        fi
+    done
+
+# php_set = ""
+    while :
+    do
+        read -p "Do you want to create a php website? [y/n]:" php_ok
+        case ${php_ok} in
+        y|Y)
+            # echo ${php_ok} 
+            php_set=yes
+            break
+        # case ${php_ok} in
+        ;;
+        n|N) 
+            # echo ${php_ok} 
+            php_set=no
+            break
+        # case ${php_ok} in
+        ;;
+        *)
+        # echo ${php_ok} 
+        # php_set=no
+    esac
+    done
+
+    while :
+    do
+        read -p "Do you want to create a database and mysql user with same name? [y/n]:" create
+        case ${create} in
+        y|Y)
+            if [ ! "$(command -v "mysql")" ]; then
+                echo -e "\033[31mError:\033[0m $(db_name) is not installed, please check it and try again."
+                exit 1
+            fi
+            mysql_count=$(ps -ef | grep -v grep | grep -c "mysqld")
+            if [ ${mysql_count} -eq 0 ]; then
+                echo "Info: $(db_name) looks like not running, Try to starting $(db_name)..."
+                /etc/init.d/mysqld start > /dev/null 2>&1
+                if [ $? -ne 0 ]; then
+                    echo -e "\033[31mError:\033[0m $(db_name) starting failed!"
+                    exit 1
+                fi
+            fi
+            read -p "Please enter your $(db_name) root password:" mysqlroot_passwd
+            mysql -uroot -p${mysqlroot_passwd} <<EOF
+exit
+EOF
+            if [ $? -ne 0 ]; then
+                echo -e "\033[31mError:\033[0m $(db_name) root password incorrect! Please check it and try again."
+                exit 1
+            fi
+            read -p "Please enter the database name:" dbname
+            [ -z ${dbname} ] && echo -e "\033[31mError:\033[0m database name can not be empty." && exit 1
+            read -p "Please set the password for user ${dbname}:" mysqlpwd
+            echo
+            [ -z ${mysqlpwd} ] && echo -e "\033[31mError:\033[0m user password can not be empty." && exit 1
+            create="y"
+            break
+            ;;
+        n|N)
+            echo "Do not create a database"
+            echo
+            create="n"
+            break
+            ;;
+        *) echo "Please enter only y or n"
+        esac
+    done
+
+    mkdir -p /data/wwwlog/${server_names%% *} ${website_root}
+
+    if [ "${php_set}" == "yes" ]; then
+    cat > ${nginx_location}/conf/vhost/${server_names%% *}.conf << EOF
+server {
+        listen       80;
+        # owner ${email}    
+        # ${php_admin_value}
+
+        server_name  ${server_names%% *} ${server_names};
+        access_log /data/wwwlog/${server_names%% *}/access.log;
+
+    index index.html index.htm index.php;
+    root ${website_root};
+    location ~ .*\.(php|php5)?$
+    {
+        #fastcgi_pass  unix:/tmp/php-cgi.sock;
+        fastcgi_pass  127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi.conf;
+    }
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+    {
+        expires 30d;
+    }
+    location ~ .*\.(js|css)?$
+    {
+        expires 1h;
+    }
+
+}    
+EOF
+
+else 
+    cat > ${nginx_location}/conf/vhost/${server_names%% *}.conf << EOF
+# <VirtualHost *:80>
+server {
+    listen       80;
+    # owner ${email}    
+    # ${php_admin_value}
+
+    # ServerName ${server_names%% *}
+    # ServerAlias ${server_names}
+    server_name  ${server_names%% *} ${server_names};
+    access_log /data/wwwlog/${server_names%% *}/access.log;
+    
+
+    location ~ ^/(images|javascript|js|css|flash|media|static)/  {
+      # root    /var/www/virtual/big.server.com/htdocs;
+    root ${website_root};
+      expires 30d;
+    }
+
+ }
+   
+EOF
+fi        
+
+
+    echo "Virtual host [${server_names%% *}] has been created"
+    echo "Website root directory is: ${website_root}"
+
+    if [ "$create" = "y" ]; then
+        mysql -uroot -p${mysqlroot_passwd} <<EOF
+CREATE DATABASE IF NOT EXISTS \`${dbname}\` CHARACTER SET utf8 COLLATE utf8_general_ci;
+GRANT ALL PRIVILEGES ON \`${dbname}\` . * TO '${dbname}'@'localhost' IDENTIFIED BY '${mysqlpwd}';
+GRANT ALL PRIVILEGES ON \`${dbname}\` . * TO '${dbname}'@'127.0.0.1' IDENTIFIED BY '${mysqlpwd}';
+FLUSH PRIVILEGES;
+EOF
+        echo "Database [${dbname}] and mysql user [${dbname}] has been created"
+    fi
+
+    echo "Reloading the nginx config file..."
+    if ${nginx_location}/sbin/nginx -t ; then  
+        ${nginx_location}/sbin/nginx -s reload
+        echo "Reload succeed"
+        echo
+    else
+        echo -e "\033[31mError:\033[0m Reload failed. Nginx config file had an error, please fix it and try again."
+        exit 1
+    fi
+
+    read -p "Do you want to add a SSL certificate? [y/n]:" create_ssl
+    if [ "${create_ssl}" = "y" ] || [ "${create_ssl}" = "Y" ]; then
+        add_ssl_memu
+        add_ssl_cert
+        echo "Reloading the nginx config file..."
+    if ${nginx_location}/sbin/nginx -t ; then  
+        ${nginx_location}/sbin/nginx -s reload
+            echo "Reload succeed"
+            echo
+        else
+            echo -e "\033[31mError:\033[0m Reload failed. Nginx config file had an error, please fix it and try again."
+        fi
+    else
+        echo "Do not add a SSL certificate"
+        echo
+    fi
+
+    chown -R www:www /data/wwwlog/${server_names%% *} ${website_root}
+    echo "All done"
+
+}
+add_ssl_memu(){
+    echo -e "\033[32m1.\033[0m Use your own SSL Certificate and Key"
+    echo -e "\033[32m2.\033[0m Use Let's Encrypt CA to create SSL Certificate and Key"
+    echo -e "\033[32m3.\033[0m Use Buypass.com CA to create SSL Certificate and Key"
+    while :
+    do
+        read -p "Please enter 1 or 2 or 3: " ssl_pick
+        if [ "${ssl_pick}" = "1" ]; then
+            while :
+            do
+            read -p "Please enter full path to SSL Certificate file .crt file: " ssl_certificate
+            if [ -z "${ssl_certificate}" ]; then
+                echo -e "\033[31mError:\033[0m SSL Certificate file can not be empty."
+            elif [ -f "${ssl_certificate}" ]; then
+                break
+            else
+                echo -e "\033[31mError:\033[0m ${ssl_certificate} does not exist or is not a file."
+            fi
+            done
+
+            while :
+            do
+            read -p "Please enter full path to SSL Certificate Key file: " ssl_certificate_key
+            if [ -z "${ssl_certificate_key}" ]; then
+                echo -e "\033[31mError:\033[0m SSL Certificate Key file can not be empty."
+            elif [ -f "${ssl_certificate_key}" ]; then
+                break
+            else
+                echo -e "\033[31mError:\033[0m ${ssl_certificate_key} does not exist or is not a file."
+            fi
+            done
+            break
+        elif [ "${ssl_pick}" = "2" ]; then
+            echo "You chosen Let's Encrypt CA, and it will be processed automatically"
+            echo
+            break
+        elif [ "${ssl_pick}" = "3" ]; then
+            echo "You chosen Buypass.com CA, and it will be processed automatically"
+            echo
+            break
+        else
+            echo -e "\033[31mError:\033[0m Please only enter 1 or 2 or 3"
+        fi
+    done
+
+    read -p "Do you want force redirection from HTTP to HTTPS? [y/n]:" force_ssl
+    if [ "${force_ssl}" = "y" ] || [ "${force_ssl}" = "Y" ]; then
+        echo "You chosen force redirection from HTTP to HTTPS, and it will be processed automatically"
+        echo
+    else
+        echo "Do not force redirection from HTTP to HTTPS"
+        echo
+    fi
+}
+
+create_ssl_config(){
+    sed -i 's@#Include conf/extra/httpd-ssl.conf@Include conf/extra/httpd-ssl.conf@g' ${nginx_location}/conf/nginx.conf
+
+    if [ "${php_set}" == "yes" ]; then
+    cat >> ${nginx_location}/conf/vhost/${server_names%% *}.conf << EOF
+server {
+        listen       443;
+        # owner ${email}    
+        # ${php_admin_value}
+
+        server_name  ${server_names%% *} ${server_names};
+        access_log /data/wwwlog/${server_names%% *}/access.log;
+    ssl          on;
+    ssl_certificate     ${ssl_certificate};
+    ssl_certificate_key ${ssl_certificate_key};
+    ssl_session_timeout  5m;
+    ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128:AES256:AES:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK';
+    ssl_prefer_server_ciphers   on;
+
+    index index.html index.htm index.php;
+    root ${website_root};
+    location ~ .*\.(php|php5)?$
+    {
+        #fastcgi_pass  unix:/tmp/php-cgi.sock;
+        fastcgi_pass  127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi.conf;
+    }
+    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$
+    {
+        expires 30d;
+    }
+    location ~ .*\.(js|css)?$
+    {
+        expires 1h;
+    }
+
+}    
+EOF
+
+else 
+    cat >> ${nginx_location}/conf/vhost/${server_names%% *}.conf << EOF
+# <VirtualHost *:80>
+server {
+    listen       443;
+    # owner ${email}    
+    # ${php_admin_value}
+
+    server_name  ${server_names%% *} ${server_names};
+    access_log /data/wwwlog/${server_names%% *}/access.log;
+    
+    ssl          on;
+    ssl_certificate     ${ssl_certificate};
+    ssl_certificate_key ${ssl_certificate_key};
+    # ssl_client_certificate ${ssl_certificate};
+    ssl_session_timeout  5m;
+    ssl_protocols SSLv3 TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128:AES256:AES:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK';
+    ssl_prefer_server_ciphers   on;
+    # index index.html;
+
+
+    location ~ ^/(images|javascript|js|css|flash|media|static)/  {
+      # root    /var/www/virtual/big.server.com/htdocs;
+    root ${website_root};
+    include ${website_root}/.htaccess;
+      expires 30d;
+    }
+
+ }
+   
+EOF
+fi    
+
+}
+
+# server {
+#     listen 80 default_server;
+#     listen [::]:80 default_server;
+#     server_name _;
+#     return 301 https://$host$request_uri;
+# }
+
+create_ssl_htaccess(){
+#     cat > ${website_root}/.htaccess << EOF
+# <IfModule mod_rewrite.c>
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R,L]
+# </IfModule>
+# EOF
+sed '7 a return 301 https://$host$request_uri;' -i ${nginx_location}/conf/vhost/${server_names%% *}.conf
+}
+
+check_lets_cron(){
+    if [ "$(command -v crontab)" ]; then
+        if crontab -l | grep -q "/bin/certbot renew --disable-hook-validation"; then
+            echo "Cron job for automatic renewal of certificates is existed."
+        else
+            echo "Cron job for automatic renewal of certificates is not exist, create it."
+            (crontab -l ; echo '0 3 */7 * * /bin/certbot renew --disable-hook-validation --renew-hook "systemctl restart nginx"') | crontab -
+        fi
+    else
+        echo -e "\033[33mWarning:\033[0m crontab command not found, please set up a cron job by manually."
+    fi
+}
+
+add_letsencrypt(){
+    echo "Starting create Let's Encrypt SSL Certificate..."
+    /bin/certbot certonly -m ${email} --agree-tos -n --webroot -w ${website_root} ${letsdomain}
+    if [ $? -eq 0 ]; then
+        ssl_certificate="/etc/letsencrypt/live/${server_names%% *}/fullchain.pem"
+        ssl_certificate_key="/etc/letsencrypt/live/${server_names%% *}/privkey.pem"
+        echo "Create Let's Encrypt SSL Certificate succeed"
+    else
+        echo -e "\033[31mError:\033[0m Create Let's Encrypt SSL Certificate failed."
+        exit 1
+    fi
+}
+
+add_buypass(){
+    echo "Starting create Buypass.com SSL Certificate..."
+    /bin/certbot certonly -m ${email} --agree-tos -n --webroot -w ${website_root} ${letsdomain} --server 'https://api.buypass.com/acme/directory'
+    if [ $? -eq 0 ]; then
+        ssl_certificate="/etc/letsencrypt/live/${server_names%% *}/fullchain.pem"
+        ssl_certificate_key="/etc/letsencrypt/live/${server_names%% *}/privkey.pem"
+        echo "Create Buypass.com SSL Certificate succeed"
+    else
+        echo -e "\033[31mError:\033[0m Create Buypass.com SSL Certificate failed."
+        exit 1
+    fi
+}
+
+add_ssl_cert(){
+    if [ -z "${email}" ] || [ -z "${website_root}" ]; then
+        echo -e "\033[31mError:\033[0m parameters must be specified."
+        exit 1
+    fi
+    if [ ! -d "${website_root}" ]; then
+        echo -e "\033[31mError:\033[0m ${website_root} does not exist or is not a directory."
+        exit 1
+    fi
+    letsdomain=""
+    if [ ! -z "${server_names}" ]; then
+        for i in ${server_names}; do
+            letsdomain=${letsdomain}" -d ${i}"
+        done
+    fi
+
+    if [ ! -s /bin/certbot ]; then
+        wget --no-check-certificate -qO /bin/certbot https://dl.eff.org/certbot-auto
+        chmod +x /bin/certbot
+    fi
+
+    if [ "${ssl_pick}" = "2" ]; then
+        add_letsencrypt
+    elif [ "${ssl_pick}" = "3" ]; then
+        add_buypass
+    fi
+
+    create_ssl_config
+    check_lets_cron
+
+    if [ "${force_ssl}" = "y" ] || [ "${force_ssl}" = "Y" ]; then
+        create_ssl_htaccess
+    fi
+}
+
+vhost_list(){
+    if [ $(ls ${nginx_location}/conf/vhost/ | grep ".conf$" | grep -v "none" | grep -v "default" | wc -l) -gt 0 ]; then
+        echo "Server Name"
+        echo "------------"
+    else
+        echo "Nginx virtual host not found. You can create a new Nginx virtual host with command: lamp add"
+    fi
+    ls ${nginx_location}/conf/vhost/ | grep ".conf$" | grep -v "none" | grep -v "default" | sed 's/.conf//g'
+}
+
+vhost_del(){
+    read -p "Please enter a domain you want to delete it (for example: www.lamp.sh): " domain
+    if ! nginx_vhost_is_exist "${domain}"; then
+        echo -e "\033[31mError:\033[0m Virtual host [${domain}] not found."
+        exit 1
+    else
+        rm -f ${nginx_location}/conf/vhost/${domain}.conf
+        echo "Virtual host [${domain}] has been deleted, and website files will not be deleted."
+        echo "You need to delete the website files by manually if necessary."
+        echo "Reloading the nginx config file..."
+        if ${nginx_location}/sbin/nginx -t ; then  
+            ${nginx_location}/sbin/nginx -s reload
+            echo "Reload succeed"
+        else
+            echo -e "\033[31mError:\033[0m Reload failed. Nginx config file had an error, please fix it and try again"
+            exit 1
+        fi
+    fi
+}
+
+nginx_vhost_is_exist(){
+    local conf_file="${nginx_location}/conf/vhost/$1.conf"
+    if [ -f "${conf_file}" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+display_usage(){
+printf "
+
+Usage: `basename $0` [ add | del | list ]
+add     Create a new Nginx virtual host
+del     Delete a Nginx virtual host
+list    List all of Nginx virtual hosts
+
+"
+}
+
+#Run it
+rootness
+if [ $# -ne 1 ]; then
+    display_usage
+    exit 1
+fi
+
+action=$1
+case ${action} in
+    add)  vhost ${action} ;;
+    list) vhost ${action} ;;
+    del)  vhost ${action} ;;
+    *)    display_usage   ;;
+esac
