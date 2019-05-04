@@ -1,17 +1,3 @@
-
-!/bin/bash
-##Enter Username and Password Details:
-#userName=<UserName>
-#password=<Password>
-# yum install -y expect
-# expect -c "
-# yum install -y expect
-
-# echo "waiting a moment"
-
-
-
-
 #!/usr/bin/expect
 # owner yann
 # dat 04052019

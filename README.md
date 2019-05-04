@@ -82,16 +82,16 @@ create database wp
 然后通过浏览器输入服务器的ip地址,进入wp的部署环节.<br>
 当然,这样数据库会有风险, 稍后会提供一个生成随机密码的功能.<br>
 
-0505
-提供一个自动生成证书的脚本,  仅供测试用.
-脚本里面有2个变量: filename 和 hostname 可以改成证书名字和自己的域名.
-使用方法如下:
+0505<br>
+提供一个自动生成证书的脚本,  仅供测试用.<br>
+脚本里面有2个变量: filename 和 hostname 可以改成证书名字和自己的域名.<br>
+使用方法如下:<br>
 ```bash
 yum install -y expect
 chmod +x cert.sh
 ./cert.sh
 ```  
-注意,**不能**使用 sh cert.sh 的方法执行.
+注意,**不能**使用 sh cert.sh 的方法执行.<br>
 
 
 <div align="center">
