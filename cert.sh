@@ -2,11 +2,18 @@
 # owner yann
 # dat 04052019
 
-# set filename [lindex $argv 0]
-# set hostname [lindex $argv 1]
+if {  $argc != 2 } {
+    send_user ""
+    send_user "\t need filename and domian 不要.com \n"
+    exit
+}
 
-set filename "server"
-set hostname "about0.com"
+
+ set filename [lindex $argv 0]
+ set hostname [lindex $argv 1]
+
+# set filename "server"
+# set hostname "about0"
 
 send_user "${hostname}\n"
 # send_user "usage:expect filename hostname\n"
@@ -33,10 +40,3 @@ interact
 
 spawn openssl x509 -req -days 3650 -in $filename.csr -CA ca.crt -CAkey $filename.key -CAcreateserial -out $filename.crt
 interact
-
-
-
-
-
-
-

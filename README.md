@@ -1,3 +1,30 @@
+更新 0706  
+
+以下为我部署网站的大约流程  
+
+- 运行lamp脚本  
+
+- 部署wp  
+
+    插件  
+
+    主题  
+
+- 更改dns指向  
+
+- 重启服务器  
+
+- 生成证书  
+
+- 使用lnmp更新nginx配置  
+
+- 数据库帐号整理  
+
+  
+
+- 运行lamp脚本    
+
+
 最近打算搭个博客给自己用,发现很久没做lnmp了,所以有了下文:
 
 暂命名为 "一键舒服 01号成果"<br>
@@ -22,6 +49,7 @@
 https://www.vultr.com/?ref=7997492 <br>
 <a href="https://www.vultr.com/?ref=7997492"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
 <br>
+
 ```bash
 cd ~
 yum -y install wget git tmux
@@ -43,8 +71,12 @@ tmux a
 ```
 <a href="https://www.vultr.com/?ref=7997493-4F"><img src="https://www.vultr.com/media/banner_2.png" width="468" height="60"></a>
 <br>
+
+- 部署wp    
+
 附赠一个部署wordpress 博客的语句:<br>
 <br>
+
 ```bash
 wget https://wordpress.org/wordpress-5.0.3.tar.gz
 tar zxvf wordpress-5.0.3.tar.gz 
@@ -67,6 +99,9 @@ mv weichuncai /data/www/default/wp-content/plugins/
 ```
 
 <br>
+
+
+
 部署完之后,登陆服务器,键入以下3句命令即可:<br>
 <br>
 
@@ -90,7 +125,7 @@ create database wp
 yum install -y expect
 chmod +x cert.sh
 ./cert.sh
-```  
+```
 注意,**不能**使用 sh cert.sh 的方法执行.<br>
 
 
