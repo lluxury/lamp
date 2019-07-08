@@ -1011,7 +1011,7 @@ install_fail2ban(){
 # Ban hosts for one hour:
 bantime = 43200
 findtime = 600
-maxretry = 1
+maxretry = 2
 
 # Override /etc/fail2ban/jail.d/00-firewalld.conf:
 banaction = iptables-multiport

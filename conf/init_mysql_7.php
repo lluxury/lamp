@@ -23,7 +23,7 @@ function num_rand($length) {
 
  $mysqli = new mysqli("localhost", "root", "lamp.sh", "mysql");
 // $sql = "SELECT * FROM user";
-$sql = "UPDATE user SET authentication_string=password('{$password}') WHERE user='yann'";
+$sql = "UPDATE user SET authentication_string=password('{$password}') WHERE user='root'";
 $result = $mysqli->query($sql);
 
 $update = "flush privileges";
