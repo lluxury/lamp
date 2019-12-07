@@ -1002,8 +1002,15 @@ install_tools(){
 #start install fail2ban
 install_fail2ban(){
     log "Info" "Starting to install development fail2ban"
-    # check
+    if check_sys packageManager apt; then
+        apt-get -y update > /dev/null 2>&1
+        apt_tools=(fail2ban)
+        for tool in ${apt_tools[@]}; do
+            error_detect_depends "apt-get -y install ${tool}"
+        done
+    elif check_sys packageManager yum; then
     yum install -y fail2ban 
+    fi
     systemctl enable fail2ban
 
     cat > /etc/fail2ban/jail.local <<EOF
