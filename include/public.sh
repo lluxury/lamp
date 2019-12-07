@@ -973,7 +973,7 @@ install_tools(){
     log "Info" "Starting to install development tools..."
     if check_sys packageManager apt; then
         apt-get -y update > /dev/null 2>&1
-        apt_tools=(gcc g++ make wget perl curl bzip2 libreadline-dev net-tools python python-dev cron ca-certificates ntpdate libpcre3 libpcre3-dev)
+        apt_tools=(gcc g++ make wget perl curl bzip2 libreadline-dev net-tools python python-dev cron ca-certificates ntpdate libpcre3 libpcre3-dev openssl libssl-dev)
         for tool in ${apt_tools[@]}; do
             error_detect_depends "apt-get -y install ${tool}"
         done
