@@ -1,3 +1,19 @@
+#start install zlib
+install_zlib(){
+    log "Info" "Starting to install zlib"
+    if check_sys packageManager apt; then
+        wget http://zlib.net/zlib-1.2.11.tar.gz
+        tar zxvf zlib-1.2.11.tar.gz 
+        cd zlib-1.2.11/
+        ./configure 
+        make
+        make install
+        cd ..
+    elif check_sys packageManager yum; then
+    # yum install -y fail2ban 
+    fi
+    log "Info" "Install development zlib completed..."    
+}
 
 
 nginx_preinstall_settings(){
@@ -7,6 +23,7 @@ nginx_preinstall_settings(){
     # else
     #     display_menu_multi apache_modules last
     # fi
+    install_zlib()
     apache_modules_install="do_not_install"
     pass
 }
