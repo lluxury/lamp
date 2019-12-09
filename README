@@ -1,0 +1,103 @@
+    cd ~
+    apt-get update
+    apt-get install -y wget git tmux
+
+    git clone https://github.com/lluxury/lamp.git
+
+    cd lamp
+    chmod 755 *.sh
+
+    cmd=$(which tmux) # tmux path
+    session=lamp
+    $cmd has-session -t $session
+
+
+    if [ $? != 0 ]; then
+      $cmd new -d -n f21 -s $session "cd ~/lamp && /bin/bash ~/lamp/lamp.sh --apache_option 2 --apache_modules 4 --db_option 3 \
+      --db_root_pwd lamp.sh --php_option 3 --php_extensions 15 --phpmyadmin_option 2 --kodexplorer_option 2
+    "
+    fi
+
+    tmux a
+
+12-09 14:54  
+// 版本更新, 并修正了 Ubuntu 下安装的问题
+
+
+12-09 11:16  
+// mysql: error while loading shared libraries: libncurses.so.5
+// httpd 也被安装, 使用菜单也装了
+
+
+
+12-07 22:25  
+// 测试 Ubuntu
+// 一键舒服有点问题:
+// yum 安装基础, tmux 自动,及sh 启动
+
+// ./configure: error: the HTTP gzip module requires the zlib library.
+// ./configure: error: SSL modules require the OpenSSL library.
+// apt安装有漏洞, 有空整理下,还原为编译安装的 注意
+
+
+
+12-08 01:15  
+// 目前 16 个文件有差异,尝试和并
+// 更新 nginx 版本, 修正 openssh
+// 原版是可以安装成功的, 看来要修正的是我自己的
+
+
+// Apache: nginx-1.8.1
+// Default Website: http://172.83.155.194
+// Apache Location: /usr/local/apache
+
+// Database: mysql-5.7.28
+// MySQL Location: /usr/local/mysql
+// MySQL Data Location: /usr/local/mysql/data
+// MySQL Root Password: lamp.sh
+
+// PHP: php-7.1.28
+// PHP Location: /usr/local/php
+
+
+
+
+
+
+更新 0706  
+
+以下为我部署网站的大约流程  
+
+- 运行lamp脚本  
+
+- 部署wp  
+
+  插件  
+
+  主题  
+
+- 更改dns指向  
+
+- 重启服务器  
+
+- 生成证书  
+
+- 使用lnmp更新nginx配置  
+
+- 数据库帐号整理<br>  
+
+<br>
+
+- 运行lamp脚本    
+
+
+最近打算搭个博客给自己用,发现很久没做lnmp了,所以有了下文:
+
+暂命名为 "一键舒服 01号成果"<br>
+根据自己需要,制作了修改版, <br>
+增加了 nginx的安装功能,<br>
+提供了新的一鍵安装方法.<br>
+
+花了四天时间测试,大约装了几十次, 终于得出一个能用的版本,<br>
+虽然我想做到更广泛的兼容,但目前没有那个精力,也没有相应的时间.<br>
+<br>

@@ -16,50 +16,53 @@ php_preinstall_settings(){
     if [ "${apache}" == "do_not_install" ]; then
         php="do_not_install"
     else
-        display_menu php 3
+        # display_menu php 3
+        display_menu php 4
     fi
 }
 
 #Intall PHP
 install_php(){
-    if [ "${mysql}" != "do_not_install" ]; then
-        if [ "${php}" == "${php5_6_filename}" ]; then
-            with_mysql="--enable-mysqlnd --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
-        else
-            with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
-        fi
-    else
-        with_mysql=""
-    fi
+    # if [ "${mysql}" != "do_not_install" ]; then
+    #     if [ "${php}" == "${php5_6_filename}" ]; then
+    #         with_mysql="--enable-mysqlnd --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
+    #     else
+    #         with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
+    #     fi
+    # else
+    #     with_mysql=""
+    # fi
 
-    if [ "${apache}" == "${apache2_4_filename}" ]; then
-        with_apxs="--with-apxs2=${apache_location}/bin/apxs"
-    else
-        with_apxs=""
-    fi
-
+    # if [ "${apache}" == "${apache2_4_filename}" ]; then
+    #     with_apxs="--with-apxs2=${apache_location}/bin/apxs"
+    # else
+    #     with_apxs=""
+    # fi
 
     if [ "${php}" == "${php5_6_filename}" ]; then
+        with_mysql="--enable-mysqlnd --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
         with_gd="--with-gd --with-vpx-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     else
+        with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
         with_gd="--with-gd --with-webp-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     fi
-
     if [[ "${php}" == "${php7_2_filename}" || "${php}" == "${php7_3_filename}" ]]; then
         other_options="--enable-zend-test"
     else
         other_options="--with-mcrypt --enable-gd-native-ttf"
     fi
-
     if [ "${php}" == "${php7_3_filename}" ]; then
         with_libmbfl=""
     else
         with_libmbfl="--with-libmbfl"
     fi
 
+# -    ${with_apxs} \
+# -    --enable-fpm \
+
     is_64bit && with_libdir="--with-libdir=lib64" || with_libdir=""
     php_configure_args="--prefix=${php_location} \
-    ${with_apxs} \
+    --with-apxs2=${apache_location}/bin/apxs \
     --with-config-file-path=${php_location}/etc \
     --with-config-file-scan-dir=${php_location}/php.d \
     --with-pcre-dir=${depends_prefix}/pcre \
@@ -96,7 +99,6 @@ install_php(){
     --enable-calendar \
     --enable-dba \
     --enable-exif \
-    --enable-fpm \
     --enable-ftp \
     --enable-gd-jis-conv \
     --enable-intl \
@@ -109,16 +111,16 @@ install_php(){
     --enable-zip \
     ${disable_fileinfo}"
 
-# --enable-opcache \
-# --enable-static \
-# --enable-inline-optimization \
-# --with-iconv \ moudle
-# --without-sqlite \
-# --disable-ipv6 \
-# --disable-debug \
-# --disable-maintainer-zts \
-# --disable-safe-mode \
-# --enable-fastcgi \
+# -# --enable-opcache \
+# -# --enable-static \
+# -# --enable-inline-optimization \
+# -# --with-iconv \ moudle
+# -# --without-sqlite \
+# -# --disable-ipv6 \
+# -# --disable-debug \
+# -# --disable-maintainer-zts \
+# -# --disable-safe-mode \
+# -# --enable-fastcgi \
 
 
     #Install PHP depends
@@ -151,12 +153,11 @@ install_php(){
     unset LD_LIBRARY_PATH
     unset CPPFLAGS
     ldconfig
-    
-    export LD_LIBRARY_PATH=/lib/:/usr/lib/:/usr/local/lib
+# -    export LD_LIBRARY_PATH=/lib/:/usr/lib/:/usr/local/lib
+
     error_detect "./configure ${php_configure_args}"
     error_detect "parallel_make ZEND_EXTRA_LIBS='-liconv'"
     error_detect "make install"
-
 
     mkdir -p ${php_location}/{etc,php.d}
     cp -f ${cur_dir}/conf/php.ini ${php_location}/etc/php.ini
@@ -193,13 +194,11 @@ EOF
         sed -i "s#mysql.default_socket.*#mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
         sed -i "s#mysqli.default_socket.*#mysqli.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
         sed -i "s#pdo_mysql.default_socket.*#pdo_mysql.default_socket = ${sock_location}#" ${php_location}/etc/php.ini
-        
-        sed -i 's/post_max_size = 8M/post_max_size = 64M/g' ${php_location}/etc/php.ini
-        sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 64M/g' ${php_location}/etc/php.ini
-        sed -i 's/;date.timezone =/date.timezone = PRC/g' ${php_location}/etc/php.ini
-        sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' ${php_location}/etc/php.ini
-        sed -i 's/max_execution_time = 30/max_execution_time = 300/g' ${php_location}/etc/php.ini
-
+# -        sed -i 's/post_max_size = 8M/post_max_size = 64M/g' ${php_location}/etc/php.ini
+# -        sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 64M/g' ${php_location}/etc/php.ini
+# -        sed -i 's/;date.timezone =/date.timezone = PRC/g' ${php_location}/etc/php.ini
+# -        sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' ${php_location}/etc/php.ini
+# -        sed -i 's/max_execution_time = 30/max_execution_time = 300/g' ${php_location}/etc/php.ini
 
     fi
 
@@ -207,7 +206,7 @@ EOF
         sed -i "s@AddType\(.*\)Z@AddType\1Z\n    AddType application/x-httpd-php .php .phtml\n    AddType appication/x-httpd-php-source .phps@" ${apache_location}/conf/httpd.conf
     fi
 
-    if [[ -d "${nginx_location}" || -d "${tengine_location}" ]]; then
+if [[ -d "${nginx_location}" || -d "${tengine_location}" ]]; then
         sed -i 's#; extension_dir = \"\.\/\"#extension_dir = "${php_location}/lib/php/extensions/no-debug-non-zts-20121212/"#'  ${php_location}/etc/php.ini
 
         cp ${php_location}/etc/php-fpm.conf.default ${php_location}/etc/php-fpm.conf
@@ -231,13 +230,11 @@ cat > /usr/lib/systemd/system/php.service<<-EOF
 [Unit]
 Description=php
 After=network.target
-
 [Service]
 Type=forking
 ExecStart=/usr/local/php/sbin/php-fpm
 ExecStop=/bin/pkill -9 php-fpm
 PrivateTmp=true
-
 [Install]
 WantedBy=multi-user.target
 EOF
@@ -257,3 +254,4 @@ systemctl enable php.service
 
 
 }
+#}

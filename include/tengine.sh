@@ -8,7 +8,7 @@ tengine_preinstall_settings(){
     #     display_menu_multi apache_modules last
     # fi
     apache_modules_install="do_not_install"
-    pass
+
 
 }
 
@@ -23,7 +23,7 @@ install_tengine(){
     --with-pcre"
    
 
-    log "Info" "Starting to install dependencies packages for tengine..."
+    _info "Starting to install dependencies packages for tengine..."
     # local apt_list=(zlib1g-dev openssl libssl-dev libxml2-dev lynx lua-expat-dev libjansson-dev)
     local yum_list=(pcre-devel openssl openssl-devel)
     if check_sys packageManager apt; then
@@ -35,7 +35,7 @@ install_tengine(){
             error_detect_depends "yum -y install ${depend}"
         done
     fi
-    log "Info" "Install dependencies packages for tengine completed..."
+    _info "Install dependencies packages for tengine completed..."
 
     cd ${cur_dir}/software/
     download_file "${tengine2_2_filename}.tar.gz" "${tengine2_2_filename_url}"
@@ -55,7 +55,7 @@ install_tengine(){
 
     # error_detect "parallel_make"
     error_detect "make install"
-    log "Info" "finish tengine install begin set config file"
+    _info "finish tengine install begin set config file"
     
     config_tengine 
 }
