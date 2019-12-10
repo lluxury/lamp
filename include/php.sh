@@ -46,6 +46,13 @@ install_php(){
         with_mysql="--enable-mysqlnd --with-mysqli=mysqlnd --with-mysql-sock=/tmp/mysql.sock --with-pdo-mysql=mysqlnd"
         with_gd="--with-gd --with-webp-dir --with-jpeg-dir --with-png-dir --with-xpm-dir --with-freetype-dir"
     fi
+
+    if [ "${apache}" == "${apache2_4_filename}" ]; then
+        with_apxs="--with-apxs2=${apache_location}/bin/apxs"
+    else
+        with_apxs=""
+    fi
+
     if [[ "${php}" == "${php7_2_filename}" || "${php}" == "${php7_3_filename}" ]]; then
         other_options="--enable-zend-test"
     else
@@ -62,7 +69,7 @@ install_php(){
 
     is_64bit && with_libdir="--with-libdir=lib64" || with_libdir=""
     php_configure_args="--prefix=${php_location} \
-    --with-apxs2=${apache_location}/bin/apxs \
+    ${with_apxs} \
     --with-config-file-path=${php_location}/etc \
     --with-config-file-scan-dir=${php_location}/php.d \
     --with-pcre-dir=${depends_prefix}/pcre \
@@ -111,17 +118,17 @@ install_php(){
     --enable-zip \
     ${disable_fileinfo}"
 
-# -# --enable-opcache \
-# -# --enable-static \
-# -# --enable-inline-optimization \
-# -# --with-iconv \ moudle
-# -# --without-sqlite \
-# -# --disable-ipv6 \
-# -# --disable-debug \
-# -# --disable-maintainer-zts \
-# -# --disable-safe-mode \
-# -# --enable-fastcgi \
-
+# --enable-opcache \
+# --enable-static \
+# --enable-inline-optimization \
+# --with-iconv \ moudle
+# --without-sqlite \
+# --disable-ipv6 \
+# --disable-debug \
+# --disable-maintainer-zts \
+# --disable-safe-mode \
+# --enable-fastcgi \
+# --with-apxs2=${apache_location}/bin/apxs \
 
     #Install PHP depends
     install_php_depends

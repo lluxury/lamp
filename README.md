@@ -30,7 +30,7 @@ $cmd has -t $session
 
 if [ $? != 0 ]; then
   $cmd new -d -n f21 -s $session "cd ~/lamp && /usr/bin/sh ~/lamp/lamp.sh --apache_option 2 --apache_modules 4 --db_option 3 \
-  --db_root_pwd lamp.sh --php_option 3 --php_extensions 15 --phpmyadmin_option 2 --kodexplorer_option 2
+  --db_root_pwd lamp.sh --php_option 3 --php_extensions 11 --phpmyadmin_option 2 --kodexplorer_option 2
 "
 fi
 
