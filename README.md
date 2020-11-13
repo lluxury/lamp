@@ -1,8 +1,9 @@
-更新 1113
-aws 系统 需要:
-sudo amazon-linux-extras install epel
-centos8 需要:
-yum install libncurses*
+更新 1113   
+aws 系统 需要:   
+sudo amazon-linux-extras install epel    
+centos8 需要:   
+yum install libncurses*    
+
 
 更新 1208
 
@@ -272,63 +273,4 @@ chmod 755 *.sh
 
 | phpMyAdmin Location        | Path                                           |
 |----------------------------|------------------------------------------------|
-| Installation location      | /data/www/default/phpmyadmin                   |
-
-| KodExplorer Location       | Path                                           |
-|----------------------------|------------------------------------------------|
-| Installation location      | /data/www/default/kod                          |
-
-| PHP Location               | Path                                           |
-|----------------------------|------------------------------------------------|
-| Install Prefix             | /usr/local/php                                 |
-| Configuration File         | /usr/local/php/etc/php.ini                     |
-| ini additional location    | /usr/local/php/php.d                           |
-
-| MySQL Location             | Path                                           |
-|----------------------------|------------------------------------------------|
-| Install Prefix             | /usr/local/mysql                               |
-| Data Location              | /usr/local/mysql/data                          |
-| my.cnf Configuration File  | /etc/my.cnf                                    |
-
-| MariaDB Location           | Path                                           |
-|----------------------------|------------------------------------------------|
-| Install Prefix             | /usr/local/mariadb                             |
-| Data Location              | /usr/local/mariadb/data                        |
-| my.cnf Configuration File  | /etc/my.cnf                                    |
-
-| Percona Location           | Path                                           |
-|----------------------------|------------------------------------------------|
-| Install Prefix             | /usr/local/percona                             |
-| Data Location              | /usr/local/percona/data                        |
-| my.cnf Configuration File  | /etc/my.cnf                                    |
-
-## Process Management
-
-| Process     | Command                                                 |
-|-------------|---------------------------------------------------------|
-| Apache      | /etc/init.d/httpd  (start\|stop\|status\|restart)       |
-| MySQL       | /etc/init.d/mysqld (start\|stop\|status\|restart)       |
-| MariaDB     | /etc/init.d/mysqld (start\|stop\|status\|restart)       |
-| Percona     | /etc/init.d/mysqld (start\|stop\|status\|restart)       |
-| Memcached   | /etc/init.d/memcached (start\|stop\|restart)            |
-| Redis-Server| /etc/init.d/redis-server (start\|stop\|restart)         |
-
-## lamp Command
-
-| Command    | Description                     |
-|------------|---------------------------------|
-| lamp add   | create a virtual host           |
-| lamp list  | list all virtual host           |
-| lamp del   | remove a virtual host           |
-
-## Bugs & Issues
-
-Please feel free to report any bugs or issues to us, email to: i@teddysun.com or [open issues](https://github.com/teddysun/lamp/issues) on Github.
-
-Support(Chinese only): https://lamp.sh/support.html
-
-## License
-
-Copyright (C) 2013 - 2019 [Teddysun](https://teddysun.com/)
-
-Licensed under the [GPLv3](LICENSE) License.
+| Installation location      | /data/www/default/phpmyadmin                   
