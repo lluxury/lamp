@@ -1,3 +1,9 @@
+更新 1113
+aws 系统 需要:
+sudo amazon-linux-extras install epel
+centos8 需要:
+yum install libncurses*
+
 更新 1208
 
 其他记录移到 readme 里面去了
