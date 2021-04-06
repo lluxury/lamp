@@ -15,7 +15,7 @@ yum install libncurses*
 &nbsp;&nbsp;&nbsp;&nbsp; 这是主机厂商的推广, 使用后会给你和我各10刀,<br>
 &nbsp;&nbsp;&nbsp;&nbsp; 没有啥负作用.当然,自己有服务器用自己的也可以,<br>
 &nbsp;&nbsp;&nbsp;&nbsp; 虽然上面印的2.5刀一个月,不过是没ipv4的服务器,<br> 
-&nbsp;&nbsp;&nbsp;&nbsp; 并且早被抢完,现有的5刀一个月还是比较靠谱的.<br>
+&nbsp;&nbsp;&nbsp;&nbsp; 并且早被抢完,现有的3.5刀一个月还是比较靠谱的.<br>
 <br>
 系统选centos7, <br>
 然后把我贴在下面的代码直接复制过去用就好: <br>
